@@ -1,0 +1,6 @@
+{
+  "name": "SATorrent - Peer-to-Peer Swarm File Sharing",
+  "description": "BitTorrent-inspired decentralized browser peer-to-peer file sharing swarm over WebRTC DataChannels.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
