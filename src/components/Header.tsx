@@ -2,17 +2,14 @@ import React, { useState } from 'react';
 import {
   Copy,
   Check,
-  PlusCircle,
+  Plus,
   LogIn,
   Upload,
-  Radio,
-  Users,
   Settings,
   Terminal,
   LogOut,
-  Shield,
-  Activity,
-  Zap,
+  Radio,
+  Users,
 } from 'lucide-react';
 import { RoomState } from '../types';
 
@@ -48,83 +45,61 @@ export const Header: React.FC<HeaderProps> = ({
     navigator.clipboard.writeText(text);
     if (type === 'room') {
       setCopiedRoom(true);
-      setTimeout(() => setCopiedRoom(false), 1800);
+      setTimeout(() => setCopiedRoom(false), 1500);
     } else {
       setCopiedPeer(true);
-      setTimeout(() => setCopiedPeer(false), 1800);
+      setTimeout(() => setCopiedPeer(false), 1500);
     }
   };
 
   return (
-    <header className="h-13 bg-[#060a12] border-b border-slate-800/80 px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30 select-none font-mono text-xs shadow-md">
-      {/* Left: SATorrent Brand & Local Node */}
+    <header className="h-11 bg-[#111418] border-b border-[#272d34] px-3 flex items-center justify-between sticky top-0 z-30 select-none text-xs">
+      {/* Left: SATorrent Application Logo */}
       <div className="flex items-center gap-3">
-        {/* Compact Desktop App Logo */}
         <div className="flex items-center gap-2">
-          <div className="relative flex items-center justify-center w-7 h-7 rounded-md bg-gradient-to-br from-cyan-950 via-slate-900 to-blue-950 border border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.25)] flex-shrink-0">
-            {/* SA Monogram with orbit motif */}
-            <svg
-              className="w-4 h-4 text-cyan-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(30 12 12)" className="opacity-40 stroke-cyan-300" strokeWidth="1.2" />
-              <path d="M7 16l5-8 5 8" />
-              <path d="M8.5 13.5h7" />
-            </svg>
-            <span className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-cyan-400 ring-2 ring-[#060a12]" />
+          {/* Subtle Technical Software Icon */}
+          <div className="flex items-center justify-center w-6 h-6 rounded bg-[#191e24] border border-[#272d34] text-blue-400 font-bold text-xs">
+            <span className="tracking-tighter font-mono">SA</span>
           </div>
 
           <div className="flex items-baseline gap-1">
-            <span className="font-extrabold text-sm tracking-tight text-white">
-              <span className="text-cyan-400 font-black">SA</span>Torrent
-            </span>
-            <span className="hidden md:inline px-1 py-0.2 text-[9px] font-bold text-cyan-400/80 bg-cyan-950/60 border border-cyan-800/40 rounded">
-              MESH
+            <span className="font-semibold text-sm tracking-tight text-[#e7eaee]">
+              <span className="font-extrabold text-blue-400">SA</span>Torrent
             </span>
           </div>
         </div>
 
-        <div className="hidden lg:flex items-center gap-1.5 pl-3 border-l border-slate-800/80 text-[11px] text-slate-400">
-          <span className="text-slate-500">Node:</span>
+        {/* Local Peer ID */}
+        <div className="hidden lg:flex items-center gap-1.5 pl-3 border-l border-[#272d34] text-[11px] text-[#9299a3]">
+          <span>Peer:</span>
           <button
             onClick={() => copyToClipboard(localPeerId, 'peer')}
-            className="flex items-center gap-1 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer group"
-            title="Click to copy your Peer ID"
+            className="font-mono text-[#e7eaee] hover:text-blue-400 flex items-center gap-1 transition-colors cursor-pointer"
+            title="Click to copy Peer ID"
           >
-            <span className="font-semibold text-cyan-300 group-hover:underline">{localPeerId}</span>
+            <span>{localPeerId}</span>
             {copiedPeer ? (
               <Check className="w-3 h-3 text-emerald-400" />
             ) : (
-              <Copy className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100" />
+              <Copy className="w-2.5 h-2.5 text-[#656d77]" />
             )}
           </button>
         </div>
       </div>
 
-      {/* Middle: Swarm Room & Network States */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
-        {/* Room Code Badge */}
+      {/* Center: Room & Connection Status */}
+      <div className="flex items-center gap-2 sm:gap-3 text-[11px]">
         {roomState ? (
-          <div className="flex items-center gap-1.5 bg-slate-900/90 border border-cyan-500/30 rounded-md px-2.5 py-1 text-[11px]">
-            <div className="flex items-center gap-1.5">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-              </span>
-              <span className="text-slate-400 font-semibold hidden md:inline">ROOM</span>
-              <span className="font-bold text-cyan-300 tracking-wider">
-                {roomState.roomCode}
-              </span>
-            </div>
+          <div className="flex items-center gap-2 bg-[#161a1f] border border-[#272d34] rounded px-2.5 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[#9299a3]">Room:</span>
+            <span className="font-mono font-semibold text-[#e7eaee] tracking-wide">
+              {roomState.roomCode}
+            </span>
 
             <button
               onClick={() => copyToClipboard(roomState.roomCode, 'room')}
-              className="p-0.5 text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+              className="text-[#9299a3] hover:text-[#e7eaee] transition-colors p-0.5 cursor-pointer"
               title="Copy Room Code"
             >
               {copiedRoom ? (
@@ -134,11 +109,11 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            <span className="text-slate-700">|</span>
+            <span className="text-[#272d34]">|</span>
 
-            <div className="flex items-center gap-1 text-slate-300 font-semibold" title="Peers in room">
-              <Users className="w-3 h-3 text-cyan-400" />
-              <span>
+            <div className="flex items-center gap-1 text-[#9299a3]" title="Connected swarm peers">
+              <Users className="w-3 h-3 text-[#656d77]" />
+              <span className="text-[#e7eaee] font-medium">
                 {connectedPeersCount + 1}/{roomState.maxPeers}
               </span>
             </div>
@@ -146,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
             {onLeaveRoom && (
               <button
                 onClick={onLeaveRoom}
-                className="ml-1 p-0.5 text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
+                className="ml-1 text-[#9299a3] hover:text-red-400 transition-colors cursor-pointer"
                 title="Leave room"
               >
                 <LogOut className="w-3 h-3" />
@@ -154,83 +129,76 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 bg-slate-900/70 border border-slate-800 rounded-md px-2 py-1 text-[11px] text-slate-400">
-            <Radio className="w-3 h-3 text-amber-400 animate-pulse" />
-            <span className="hidden sm:inline">No Room</span>
+          <div className="flex items-center gap-1.5 bg-[#161a1f] border border-[#272d34] rounded px-2 py-1 text-[#9299a3]">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span>Not Connected to Room</span>
           </div>
         )}
 
-        {/* Live Network Health Pills (Real Data Only) */}
-        <div className="hidden xl:flex items-center gap-2">
-          {/* Signaling Status */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400">
+        {/* Signaling & Network Indicator */}
+        <div className="hidden sm:flex items-center gap-3 text-[#9299a3]">
+          <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span>Signaling</span>
-            <span className="text-emerald-400 font-semibold">Connected</span>
-          </div>
+            <span className="text-[#9299a3]">Signaling</span>
+          </span>
 
-          {/* WebRTC Swarm Status */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400">
-            <span className={`w-1.5 h-1.5 rounded-full ${connectedPeersCount > 0 ? 'bg-cyan-400' : 'bg-slate-600'}`} />
-            <span>WebRTC</span>
-            <span className="text-cyan-300 font-semibold">
+          <span className="flex items-center gap-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${connectedPeersCount > 0 ? 'bg-blue-400' : 'bg-[#656d77]'}`} />
+            <span className="text-[#9299a3]">
               {connectedPeersCount} {connectedPeersCount === 1 ? 'peer' : 'peers'}
             </span>
-          </div>
+          </span>
         </div>
       </div>
 
-      {/* Right: Actions & Tools */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      {/* Right: Actions */}
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={onOpenSeedModal}
+          className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+        >
+          <Upload className="w-3.5 h-3.5" />
+          <span>Seed File</span>
+        </button>
+
         {!roomState ? (
           <>
             <button
               onClick={onOpenCreateModal}
-              className="px-2.5 py-1 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded text-xs font-semibold tracking-wide flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+              className="px-2.5 py-1 bg-[#191e24] hover:bg-[#20262e] border border-[#272d34] text-[#e7eaee] rounded text-xs transition-colors cursor-pointer hidden sm:flex items-center gap-1"
             >
-              <PlusCircle className="w-3 h-3" />
-              <span className="hidden sm:inline">Create</span>
+              <Plus className="w-3.5 h-3.5 text-[#9299a3]" />
+              <span>Create</span>
             </button>
-
             <button
               onClick={onOpenJoinModal}
-              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-cyan-500/40 text-slate-200 rounded text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+              className="px-2.5 py-1 bg-[#191e24] hover:bg-[#20262e] border border-[#272d34] text-[#e7eaee] rounded text-xs transition-colors cursor-pointer flex items-center gap-1"
             >
-              <LogIn className="w-3 h-3 text-cyan-400" />
+              <LogIn className="w-3.5 h-3.5 text-[#9299a3]" />
               <span>Join</span>
             </button>
           </>
-        ) : (
-          <button
-            onClick={onOpenSeedModal}
-            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold tracking-wide flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all cursor-pointer"
-          >
-            <Upload className="w-3 h-3" />
-            <span>Seed File</span>
-          </button>
-        )}
+        ) : null}
 
-        {/* Dev Console Trigger */}
         {onToggleDebug && (
           <button
             onClick={onToggleDebug}
-            className={`p-1.5 rounded border transition-colors cursor-pointer ${
+            className={`p-1 rounded border transition-colors cursor-pointer ${
               isDebugOpen
-                ? 'bg-purple-950/80 text-purple-300 border-purple-500/40'
-                : 'text-slate-400 hover:text-slate-200 bg-slate-900 border-slate-800 hover:border-slate-700'
+                ? 'bg-[#1f2937] text-blue-400 border-blue-500/50'
+                : 'text-[#9299a3] hover:text-[#e7eaee] bg-[#161a1f] border-[#272d34] hover:bg-[#191e24]'
             }`}
-            title="Toggle Developer Telemetry Drawer"
+            title="Toggle Developer Console"
           >
             <Terminal className="w-3.5 h-3.5" />
           </button>
         )}
 
-        {/* Settings Icon */}
         {onOpenSettings && (
           <button
             onClick={onOpenSettings}
-            className="p-1.5 rounded border text-slate-400 hover:text-slate-200 bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors cursor-pointer"
-            title="Settings & Network Configuration"
+            className="p-1 rounded border text-[#9299a3] hover:text-[#e7eaee] bg-[#161a1f] border-[#272d34] hover:bg-[#191e24] transition-colors cursor-pointer"
+            title="Settings"
           >
             <Settings className="w-3.5 h-3.5" />
           </button>

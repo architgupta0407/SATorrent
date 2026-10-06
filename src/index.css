@@ -2,54 +2,35 @@
 
 @layer base {
   body {
-    background-color: #080c14;
-    color: #e2e8f0;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #0d0f12;
+    color: #e7eaee;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Custom cybernetic scrollbars */
+/* Subtle desktop software scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b111e;
+  background: #111418;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+  background: #272d34;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0ea5e9;
+  background: #3b444f;
 }
 
-/* Glow and pulse animations */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.8;
-    filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.6));
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.9));
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(56, 189, 248, 0.12);
-}
-
-.glass-panel:hover {
-  border-color: rgba(56, 189, 248, 0.25);
+/* Clean, crisp selection */
+::selection {
+  background-color: #1e3a5f;
+  color: #ffffff;
 }

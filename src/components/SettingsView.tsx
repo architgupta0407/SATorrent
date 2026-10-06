@@ -69,48 +69,51 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-3xl font-mono text-xs">
-      <div className="flex items-center gap-2">
-        <Settings className="w-5 h-5 text-cyan-400" />
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-100">
-          SATorrent Client & WebRTC Configuration
-        </h2>
+    <div className="space-y-4 max-w-3xl text-xs select-none">
+      <div className="flex items-center justify-between px-1 pb-1 border-b border-[#272d34]">
+        <div className="flex items-center gap-2">
+          <Settings className="w-4 h-4 text-blue-400" />
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#e7eaee]">
+            Preferences & WebRTC Options
+          </h2>
+        </div>
+        <span className="text-[11px] text-[#656d77]">Desktop Client Config</span>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form onSubmit={handleSave} className="space-y-3">
         {/* User & Client Profile */}
-        <div className="p-5 rounded-xl bg-[#080d19] border border-slate-800 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-800 font-bold text-cyan-300">
-            <User className="w-4 h-4" />
-            <span>Peer Identity & Preferences</span>
+        <div className="p-3.5 rounded bg-[#15191e] border border-[#272d34] space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#272d34] font-medium text-[#e7eaee] text-xs">
+            <User className="w-3.5 h-3.5 text-[#9299a3]" />
+            <span>Peer Identity</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Node Peer ID (Read-only):</label>
+              <label className="text-[#9299a3]">Node Peer ID:</label>
               <input
                 type="text"
                 readOnly
                 value={localPeerId}
-                className="w-full px-3 py-2 bg-slate-900/60 border border-slate-800 rounded-lg text-slate-400 select-all outline-none"
+                className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] rounded font-mono text-[#9299a3] select-all outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Display Name / Alias:</label>
+              <label className="text-[#9299a3]">Display Name / Alias:</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="e.g. Laptop-Alpha"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-lg text-slate-200 outline-none"
+                placeholder="e.g. Node-1"
+                className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] focus:border-blue-500 rounded text-[#e7eaee] outline-none"
               />
             </div>
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-slate-300 font-semibold">Max Room Peer Limit:</label>
-                <span className="font-bold text-cyan-300">{maxPeers} Peers</span>
+                <label className="text-[#9299a3]">Max Peers in Swarm:</label>
+                <span className="font-mono text-[#e7eaee]">{maxPeers}</span>
               </div>
               <input
                 type="range"
@@ -118,22 +121,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 max={8}
                 value={maxPeers}
                 onChange={(e) => setMaxPeers(parseInt(e.target.value, 10))}
-                className="w-full accent-cyan-400 bg-slate-800"
+                className="w-full accent-blue-500 cursor-pointer"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Developer Diagnostics Console:</label>
-              <div className="flex items-center gap-2 pt-1">
+              <label className="text-[#9299a3]">Diagnostics:</label>
+              <div className="flex items-center gap-2 pt-1.5">
                 <input
                   type="checkbox"
                   id="devModeToggle"
                   checked={devMode}
                   onChange={(e) => setDevMode(e.target.checked)}
-                  className="w-4 h-4 accent-purple-500 rounded cursor-pointer"
+                  className="w-3.5 h-3.5 accent-blue-500 rounded cursor-pointer"
                 />
-                <label htmlFor="devModeToggle" className="text-slate-300 cursor-pointer">
-                  Show developer diagnostics drawer & telemetry
+                <label htmlFor="devModeToggle" className="text-[#e7eaee] cursor-pointer">
+                  Enable Console Inspector
                 </label>
               </div>
             </div>
@@ -141,126 +144,126 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
 
         {/* Network Configuration */}
-        <div className="p-5 rounded-xl bg-[#080d19] border border-slate-800 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-800 font-bold text-cyan-300">
-            <Server className="w-4 h-4" />
-            <span>STUN / TURN Network Servers</span>
+        <div className="p-3.5 rounded bg-[#15191e] border border-[#272d34] space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#272d34] font-medium text-[#e7eaee] text-xs">
+            <Server className="w-3.5 h-3.5 text-[#9299a3]" />
+            <span>ICE / STUN / TURN Configuration</span>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-slate-300 font-semibold">STUN Servers (one per line):</label>
+          <div className="space-y-1.5 text-[11px]">
+            <label className="text-[#9299a3]">STUN Servers (one per line):</label>
             <textarea
-              rows={3}
+              rows={2}
               value={stunList}
               onChange={(e) => setStunList(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-lg text-slate-200 outline-none transition-all resize-none"
+              className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] focus:border-blue-500 rounded text-[#e7eaee] font-mono outline-none resize-none"
             />
-            <p className="text-[11px] text-slate-500">
-              Public STUN servers are used for NAT hole punching during WebRTC ICE negotiation.
+            <p className="text-[10px] text-[#656d77]">
+              STUN provides NAT traversal candidate discovery. Direct host candidates connect without server relay on local network.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] pt-1">
             <div className="space-y-1">
-              <label className="text-slate-300">TURN Server URL:</label>
+              <label className="text-[#9299a3]">TURN URL:</label>
               <input
                 type="text"
                 value={turnUrl}
                 onChange={(e) => setTurnUrl(e.target.value)}
                 placeholder="turn:turn.example.com:3478"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-lg text-slate-200 outline-none"
+                className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] focus:border-blue-500 rounded text-[#e7eaee] outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300">TURN Username:</label>
+              <label className="text-[#9299a3]">Username:</label>
               <input
                 type="text"
                 value={turnUsername}
                 onChange={(e) => setTurnUsername(e.target.value)}
                 placeholder="optional"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-lg text-slate-200 outline-none"
+                className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] focus:border-blue-500 rounded text-[#e7eaee] outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300">TURN Credential:</label>
+              <label className="text-[#9299a3]">Credential:</label>
               <input
                 type="password"
                 value={turnPassword}
                 onChange={(e) => setTurnPassword(e.target.value)}
                 placeholder="optional"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-lg text-slate-200 outline-none"
+                className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] focus:border-blue-500 rounded text-[#e7eaee] outline-none"
               />
             </div>
           </div>
 
           <div className="flex items-center justify-between pt-2">
-            <span className="text-[11px] text-slate-500">
-              LAN devices on the same Wi-Fi communicate via direct host candidates without relay.
+            <span className="text-[10px] text-[#656d77]">
+              Changes apply to new WebRTC peer connections.
             </span>
 
             <button
               type="submit"
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded-lg font-bold border border-slate-700 hover:border-cyan-500/40 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               {savedSuccess ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Configuration Saved</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Saved</span>
                 </>
               ) : (
-                <span>Save Client Config</span>
+                <span>Save Settings</span>
               )}
             </button>
           </div>
         </div>
       </form>
 
-      {/* Protocol Specs Card */}
-      <div className="p-5 rounded-xl bg-[#080d19] border border-slate-800 space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-slate-800 font-bold text-cyan-300">
-          <Layers className="w-4 h-4" />
-          <span>Swarm Architecture & College Demo Specs</span>
+      {/* Protocol Specifications Panel */}
+      <div className="p-3.5 rounded bg-[#15191e] border border-[#272d34] space-y-2">
+        <div className="flex items-center gap-2 pb-1.5 border-b border-[#272d34] font-medium text-[#e7eaee] text-xs">
+          <Layers className="w-3.5 h-3.5 text-[#9299a3]" />
+          <span>Protocol Architecture Specifications</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-slate-300">
-          <div className="space-y-1">
-            <span className="text-slate-500 text-[11px]">Default Piece Size:</span>
-            <p className="font-bold text-white">64 KB (65,536 bytes)</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+          <div>
+            <span className="text-[#656d77]">Piece Size:</span>
+            <p className="font-mono text-[#e7eaee]">64 KB (65,536 B)</p>
           </div>
-          <div className="space-y-1">
-            <span className="text-slate-500 text-[11px]">Maximum File Limit:</span>
-            <p className="font-bold text-white">250 MB</p>
+          <div>
+            <span className="text-[#656d77]">Max File Limit:</span>
+            <p className="font-mono text-[#e7eaee]">250 MB</p>
           </div>
-          <div className="space-y-1">
-            <span className="text-slate-500 text-[11px]">Swarm Mesh Capacity:</span>
-            <p className="font-bold text-white">Up to 8 peers / room</p>
+          <div>
+            <span className="text-[#656d77]">Max Room Mesh:</span>
+            <p className="font-mono text-[#e7eaee]">Up to 8 peers</p>
           </div>
-          <div className="space-y-1">
-            <span className="text-slate-500 text-[11px]">Integrity Check:</span>
-            <p className="font-bold text-emerald-400">SubtleCrypto SHA-256 Per-Piece & Final</p>
+          <div>
+            <span className="text-[#656d77]">Hash Integrity:</span>
+            <p className="text-emerald-400 font-mono">SHA-256 (SubtleCrypto)</p>
           </div>
         </div>
       </div>
 
       {/* Local Storage & Cache Management */}
-      <div className="p-5 rounded-xl bg-[#080d19] border border-slate-800 space-y-3">
-        <div className="flex items-center justify-between pb-2 border-b border-slate-800 font-bold text-red-400">
-          <div className="flex items-center gap-2">
-            <HardDrive className="w-4 h-4" />
-            <span>Browser Storage (IndexedDB)</span>
+      <div className="p-3.5 rounded bg-[#15191e] border border-[#272d34] space-y-2">
+        <div className="flex items-center justify-between pb-1.5 border-b border-[#272d34] font-medium text-xs">
+          <div className="flex items-center gap-2 text-[#e7eaee]">
+            <HardDrive className="w-3.5 h-3.5 text-[#9299a3]" />
+            <span>Local IndexedDB Storage</span>
           </div>
           <button
             onClick={handleClearCache}
-            className="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/60 border border-red-800/60 text-red-300 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-2.5 py-1 rounded bg-[#191e24] hover:bg-red-950/40 border border-[#272d34] hover:border-red-800/60 text-[#9299a3] hover:text-red-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Clear Swarm Cache</span>
+            <span>Clear Cache</span>
           </button>
         </div>
-        <p className="text-[11px] text-slate-500">
-          Removes all cached pieces and completed files stored in this browser instance.
+        <p className="text-[10px] text-[#656d77]">
+          Removes locally cached piece chunks and completed files from the browser database.
         </p>
       </div>
     </div>

@@ -2,15 +2,10 @@ import React, { useState } from 'react';
 import {
   FolderCheck,
   Download,
-  ShieldCheck,
-  FileText,
-  Clock,
   Trash2,
-  Share2,
   Copy,
   Check,
-  Filter,
-  CheckCircle2,
+  FileText,
 } from 'lucide-react';
 import { StoredCompletedFile, storage } from '../lib/storage';
 import { formatBytes } from '../lib/crypto';
@@ -28,9 +23,7 @@ export const CompletedFilesView: React.FC<CompletedFilesViewProps> = ({
   files,
   torrents = [],
   onRefresh,
-  onReSeed,
 }) => {
-  const [filter, setFilter] = useState<'all' | 'completed' | 'seeded' | 'downloading'>('all');
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
 
   const handleDownload = (file: StoredCompletedFile) => {
@@ -47,11 +40,11 @@ export const CompletedFilesView: React.FC<CompletedFilesViewProps> = ({
   const copyHash = (hash: string) => {
     navigator.clipboard.writeText(hash);
     setCopiedHash(hash);
-    setTimeout(() => setCopiedHash(null), 1800);
+    setTimeout(() => setCopiedHash(null), 1500);
   };
 
   const handleDelete = async (fileId: string) => {
-    if (confirm('Delete this file from browser storage?')) {
+    if (confirm('Delete this file from local storage?')) {
       await storage.deleteCompletedFile(fileId);
       await storage.deleteTorrentState(fileId);
       onRefresh();
@@ -59,130 +52,131 @@ export const CompletedFilesView: React.FC<CompletedFilesViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 font-mono select-none text-xs">
-      {/* Top Filter & Counter */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#070b14] p-3 rounded-xl border border-slate-800/80">
+    <div className="space-y-2 select-none text-xs">
+      <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <FolderCheck className="w-4 h-4 text-purple-400" />
-          <h3 className="font-bold uppercase tracking-wider text-slate-200">
-            Files Manager ({files.length} Completed)
+          <FolderCheck className="w-4 h-4 text-[#656d77]" />
+          <h3 className="font-semibold text-[#e7eaee]">
+            Files ({files.length} completed)
           </h3>
         </div>
-
-        {/* Filter categories as specified */}
-        <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded border border-slate-800 text-[11px]">
-          <Filter className="w-3 h-3 text-slate-500" />
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-              filter === 'all' ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-700/50' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            All Files
-          </button>
-          <button
-            onClick={() => setFilter('completed')}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-              filter === 'completed' ? 'bg-emerald-950 text-emerald-300 font-bold border border-emerald-700/50' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Completed
-          </button>
-          <button
-            onClick={() => setFilter('seeded')}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-              filter === 'seeded' ? 'bg-purple-950 text-purple-300 font-bold border border-purple-700/50' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Seeded
-          </button>
+        <div className="text-[11px] text-[#656d77]">
+          Saved in browser IndexedDB
         </div>
       </div>
 
-      {files.length === 0 ? (
-        <div className="p-8 text-center bg-[#070b14] rounded-xl border border-slate-800/80 text-slate-400 space-y-2">
-          <FolderCheck className="w-9 h-9 text-slate-600 mx-auto mb-1 opacity-60" />
-          <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">No Completed Files Yet</p>
-          <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
-            Files downloaded across the P2P swarm and validated against their expected SHA-256 hash manifest automatically appear here for offline saving.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-2.5">
-          {files.map((file) => {
-            const pieceCount = Math.ceil(file.fileSize / DEFAULT_PIECE_SIZE) || 1;
-            const completedDate = new Date(file.completedAt).toLocaleString();
+      <div className="rounded border border-[#272d34] bg-[#15191e] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-[11px]">
+            <thead className="bg-[#111418] text-[#9299a3] border-b border-[#272d34] font-semibold">
+              <tr>
+                <th className="py-2 px-3">NAME</th>
+                <th className="py-2 px-2.5">SIZE</th>
+                <th className="py-2 px-2.5 font-mono">PIECES</th>
+                <th className="py-2 px-2.5">STATUS</th>
+                <th className="py-2 px-2.5 font-mono">SHA-256</th>
+                <th className="py-2 px-2.5">COMPLETED</th>
+                <th className="py-2 px-3 text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1f242b]">
+              {files.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-6 text-center text-[#656d77]">
+                    No completed files. Files downloaded and verified will appear here for local saving.
+                  </td>
+                </tr>
+              ) : (
+                files.map((file) => {
+                  const pieceCount = Math.ceil(file.fileSize / DEFAULT_PIECE_SIZE) || 1;
+                  const completedDate = new Date(file.completedAt).toLocaleString();
 
-            return (
-              <div
-                key={file.fileId}
-                className="p-3.5 rounded-xl bg-[#070b14] border border-slate-800/90 hover:border-cyan-500/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md"
-              >
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="p-2.5 rounded-lg bg-purple-950/40 border border-purple-800/40 text-purple-400 flex-shrink-0">
-                    <FileText className="w-5 h-5" />
-                  </div>
+                  return (
+                    <tr
+                      key={file.fileId}
+                      className="hover:bg-[#191e24] transition-colors"
+                    >
+                      {/* Name */}
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                          <span className="font-medium text-[#e7eaee] truncate max-w-[220px]" title={file.fileName}>
+                            {file.fileName}
+                          </span>
+                        </div>
+                      </td>
 
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-bold text-white text-sm truncate max-w-sm sm:max-w-md">
-                        {file.fileName}
-                      </h4>
-                      <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[10px]">
+                      {/* Size */}
+                      <td className="py-2 px-2.5 text-[#9299a3] whitespace-nowrap">
                         {formatBytes(file.fileSize)}
-                      </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3" />
-                        SHA-256 VERIFIED
-                      </span>
-                    </div>
+                      </td>
 
-                    <div className="text-[10px] text-slate-400 flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                      <span>Pieces: <strong className="text-slate-200">{pieceCount}</strong> ({formatBytes(DEFAULT_PIECE_SIZE)}/ea)</span>
-                      <span>•</span>
-                      <span>Completed: <strong className="text-slate-200">{completedDate}</strong></span>
-                      <span>•</span>
-                      <span>Source: <strong className="text-cyan-300">P2P Swarm</strong></span>
-                    </div>
+                      {/* Pieces */}
+                      <td className="py-2 px-2.5 font-mono text-[#e7eaee] whitespace-nowrap">
+                        {pieceCount}
+                      </td>
 
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 pt-0.5 truncate">
-                      <span className="uppercase font-semibold">SHA-256:</span>
-                      <code className="text-slate-400 truncate">{file.overallSha256}</code>
-                      <button
-                        onClick={() => copyHash(file.overallSha256)}
-                        className="text-slate-500 hover:text-cyan-300 p-0.5"
-                        title="Copy SHA-256"
-                      >
-                        {copiedHash === file.overallSha256 ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                      {/* Status */}
+                      <td className="py-2 px-2.5 whitespace-nowrap">
+                        <span className="text-emerald-400 font-medium">
+                          ✓ Verified
+                        </span>
+                      </td>
 
-                {/* Actions: Save File (enabled only because integrity check passed) */}
-                <div className="flex items-center gap-2 flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800">
-                  <button
-                    onClick={() => handleDownload(file)}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold flex items-center gap-1.5 transition-all shadow-[0_0_10px_rgba(16,185,129,0.3)] cursor-pointer"
-                    title="Save verified file to local drive"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>SAVE FILE</span>
-                  </button>
+                      {/* SHA-256 */}
+                      <td className="py-2 px-2.5 font-mono text-[#656d77] whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <span className="truncate max-w-[120px] text-[#9299a3]" title={file.overallSha256}>
+                            {file.overallSha256.slice(0, 16)}...
+                          </span>
+                          <button
+                            onClick={() => copyHash(file.overallSha256)}
+                            className="p-0.5 text-[#656d77] hover:text-[#e7eaee] transition-colors"
+                            title="Copy Hash"
+                          >
+                            {copiedHash === file.overallSha256 ? (
+                              <Check className="w-3 h-3 text-emerald-400" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
 
-                  <button
-                    onClick={() => handleDelete(file.fileId)}
-                    className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded transition-colors cursor-pointer"
-                    title="Delete cached file from browser IndexedDB"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                      {/* Completed Date */}
+                      <td className="py-2 px-2.5 text-[#9299a3] whitespace-nowrap">
+                        {completedDate}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-2 px-3 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleDownload(file)}
+                            className="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Save to local disk"
+                          >
+                            <Download className="w-3 h-3" />
+                            <span>Save</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(file.fileId)}
+                            className="p-1 text-[#656d77] hover:text-red-400 rounded transition-colors cursor-pointer"
+                            title="Delete file"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </div>
   );
 };

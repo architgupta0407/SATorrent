@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, PlusCircle, X, Radio, AlertCircle, Users } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 
 interface JoinRoomModalProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
     if (mode === 'join') {
       const code = roomCode.trim().toUpperCase();
       if (!code) {
-        setErrorMsg('Please enter a valid 6-character room code.');
+        setErrorMsg('Please enter a room code.');
         return;
       }
       onJoinRoom(code);
@@ -43,33 +43,30 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 select-none">
-      <div className="w-full max-w-sm bg-[#070b14] border border-cyan-500/40 rounded-xl shadow-[0_0_30px_rgba(6,182,212,0.25)] overflow-hidden font-mono text-xs">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-[#090e1b]">
-          <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4 text-cyan-400" />
-            <h3 className="font-bold text-white uppercase tracking-wider text-xs">
-              {mode === 'join' ? 'JOIN SWARM ROOM' : 'CREATE SWARM ROOM'}
-            </h3>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 select-none">
+      <div className="w-full max-w-xs bg-[#15191e] border border-[#272d34] rounded shadow-lg overflow-hidden text-xs">
+        {/* Title bar */}
+        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#272d34] bg-[#111418]">
+          <span className="font-semibold text-[#e7eaee]">
+            {mode === 'join' ? 'Join Room' : 'Create Room'}
+          </span>
           <button
             onClick={onClose}
-            className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="text-[#656d77] hover:text-[#e7eaee] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Toggle */}
-        <div className="grid grid-cols-2 p-1 mx-4 mt-3 bg-slate-900 rounded-md border border-slate-800 text-[11px] font-semibold">
+        <div className="flex border-b border-[#272d34] bg-[#111418] text-[11px]">
           <button
             type="button"
             onClick={() => setMode('join')}
-            className={`py-1 rounded transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 font-medium transition-colors cursor-pointer text-center ${
               mode === 'join'
-                ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-700/50 shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'text-[#e7eaee] border-b-2 border-b-blue-500 bg-[#15191e]'
+                : 'text-[#656d77] hover:text-[#9299a3]'
             }`}
           >
             Join Room
@@ -77,10 +74,10 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
           <button
             type="button"
             onClick={() => setMode('create')}
-            className={`py-1 rounded transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 font-medium transition-colors cursor-pointer text-center ${
               mode === 'create'
-                ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-700/50 shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'text-[#e7eaee] border-b-2 border-b-blue-500 bg-[#15191e]'
+                : 'text-[#656d77] hover:text-[#9299a3]'
             }`}
           >
             Create Room
@@ -88,10 +85,10 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-4 space-y-3.5">
+        <form onSubmit={handleSubmit} className="p-3.5 space-y-3">
           {mode === 'join' ? (
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold text-[11px]">Room Code:</label>
+              <label className="text-[#9299a3] text-[11px]">Room Code</label>
               <input
                 type="text"
                 value={roomCode}
@@ -99,32 +96,29 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
                 placeholder="e.g. ABC123"
                 maxLength={8}
                 autoFocus
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded text-center text-sm font-mono tracking-widest text-cyan-300 uppercase outline-none"
+                className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] focus:border-blue-500 rounded text-center text-sm font-mono tracking-wider text-[#e7eaee] uppercase outline-none"
               />
-              <p className="text-[10px] text-slate-500 pt-0.5">
-                Obtain the 6-character room code from any connected peer in the swarm.
-              </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold text-[11px]">
-                  Custom Room Code (Optional):
+                <label className="text-[#9299a3] text-[11px]">
+                  Room Code (optional)
                 </label>
                 <input
                   type="text"
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  placeholder="Auto-generated if blank"
+                  placeholder="Auto-generated"
                   maxLength={8}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded text-sm font-mono tracking-wider text-cyan-300 uppercase outline-none"
+                  className="w-full px-2.5 py-1.5 bg-[#111418] border border-[#272d34] focus:border-blue-500 rounded text-xs font-mono text-[#e7eaee] uppercase outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-300 font-semibold">Max Room Peers:</span>
-                  <span className="text-cyan-300 font-bold">{maxPeers} peers</span>
+                <div className="flex items-center justify-between text-[11px] text-[#9299a3]">
+                  <span>Max Peers:</span>
+                  <span className="font-mono text-[#e7eaee]">{maxPeers}</span>
                 </div>
                 <input
                   type="range"
@@ -132,37 +126,32 @@ export const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
                   max="8"
                   value={maxPeers}
                   onChange={(e) => setMaxPeers(parseInt(e.target.value, 10))}
-                  className="w-full accent-cyan-400 cursor-pointer"
+                  className="w-full accent-blue-500 cursor-pointer"
                 />
-                <div className="flex justify-between text-[9px] text-slate-500">
-                  <span>2 peers</span>
-                  <span>5 peers</span>
-                  <span>8 peers (Mesh cap)</span>
-                </div>
               </div>
             </div>
           )}
 
           {errorMsg && (
-            <div className="p-2 rounded bg-red-950/60 border border-red-500/40 text-red-300 text-[10px] flex items-center gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+            <div className="p-1.5 bg-red-950/40 border border-red-800/60 rounded text-red-300 text-[10px] flex items-center gap-1.5">
+              <AlertCircle className="w-3 h-3 text-red-400 flex-shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#272d34]">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+              className="px-2.5 py-1 bg-[#191e24] hover:bg-[#20262e] border border-[#272d34] text-[#9299a3] hover:text-[#e7eaee] rounded text-xs transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded font-bold tracking-wide transition-all shadow-[0_0_10px_rgba(6,182,212,0.3)] cursor-pointer"
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium transition-colors cursor-pointer"
             >
-              {mode === 'join' ? 'JOIN SWARM' : 'CREATE ROOM'}
+              {mode === 'join' ? 'Join' : 'Create'}
             </button>
           </div>
         </form>

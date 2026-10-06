@@ -5,9 +5,6 @@ import {
   FileText,
   AlertCircle,
   Loader2,
-  CheckCircle2,
-  Layers,
-  ShieldCheck,
   FolderOpen,
 } from 'lucide-react';
 import { formatBytes } from '../lib/crypto';
@@ -32,7 +29,7 @@ export const SeedModal: React.FC<SeedModalProps> = ({ isOpen, onClose, onSeedFil
   const handleFile = (file: File) => {
     setErrorMsg(null);
     if (file.size > MAX_FILE_SIZE) {
-      setErrorMsg(`File exceeds the 250 MB safety limit (${formatBytes(file.size)}).`);
+      setErrorMsg(`File exceeds safety limit of 250 MB (${formatBytes(file.size)}).`);
       return;
     }
     if (file.size === 0) {
@@ -75,27 +72,22 @@ export const SeedModal: React.FC<SeedModalProps> = ({ isOpen, onClose, onSeedFil
     : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 select-none">
-      <div className="w-full max-w-md bg-[#070b14] border border-cyan-500/40 rounded-xl shadow-[0_0_30px_rgba(6,182,212,0.25)] overflow-hidden font-mono text-xs">
-        {/* Modal Window Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-[#090e1b]">
-          <div className="flex items-center gap-2">
-            <Upload className="w-4 h-4 text-cyan-400" />
-            <h3 className="font-bold text-white uppercase tracking-wider text-xs">
-              SEED A FILE
-            </h3>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 select-none">
+      <div className="w-full max-w-md bg-[#15191e] border border-[#272d34] rounded shadow-lg overflow-hidden text-xs">
+        {/* Title bar */}
+        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#272d34] bg-[#111418]">
+          <span className="font-semibold text-[#e7eaee]">Seed File</span>
           <button
             onClick={onClose}
             disabled={isProcessing}
-            className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="text-[#656d77] hover:text-[#e7eaee] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Content */}
-        <div className="p-4 space-y-4">
+        {/* Body */}
+        <div className="p-3.5 space-y-3">
           <input
             type="file"
             ref={fileInputRef}
@@ -104,7 +96,6 @@ export const SeedModal: React.FC<SeedModalProps> = ({ isOpen, onClose, onSeedFil
           />
 
           {!selectedFile ? (
-            /* Drag & Drop Zone */
             <div
               onDragOver={(e) => {
                 e.preventDefault();
@@ -113,73 +104,75 @@ export const SeedModal: React.FC<SeedModalProps> = ({ isOpen, onClose, onSeedFil
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+              className={`p-6 border border-dashed rounded text-center cursor-pointer transition-colors ${
                 isDragging
-                  ? 'border-cyan-400 bg-cyan-950/30 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
-                  : 'border-slate-800 hover:border-cyan-500/50 bg-slate-900/40'
+                  ? 'border-blue-500 bg-[#1e293b]'
+                  : 'border-[#272d34] hover:border-[#3b444f] bg-[#111418]'
               }`}
             >
-              <div className="p-3 rounded-full bg-cyan-950/40 border border-cyan-800/40 text-cyan-400 mb-2">
-                <FolderOpen className="w-6 h-6" />
-              </div>
-              <p className="font-bold text-white text-xs">Drag file here</p>
-              <p className="text-slate-500 text-[11px] my-1">or</p>
-              <span className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded font-semibold text-[11px] transition-colors border border-slate-700">
-                Browse files
-              </span>
-              <p className="text-[10px] text-slate-500 mt-3">
-                Max 250 MB • Auto-split into 64 KB pieces
+              <FolderOpen className="w-6 h-6 text-[#656d77] mx-auto mb-2" />
+              <p className="font-medium text-[#e7eaee]">Drag file here</p>
+              <p className="text-[#656d77] text-[11px] my-1">or</p>
+              <button
+                type="button"
+                className="px-2.5 py-1 bg-[#191e24] hover:bg-[#20262e] border border-[#272d34] text-[#e7eaee] rounded text-xs transition-colors cursor-pointer"
+              >
+                Browse
+              </button>
+              <p className="text-[10px] text-[#656d77] mt-3">
+                Max 250 MB • 64 KB pieces
               </p>
             </div>
           ) : (
-            /* File Metadata Preview */
-            <div className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-3">
+            <div className="p-3 bg-[#111418] rounded border border-[#272d34] space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                  <span className="font-bold text-white truncate max-w-[220px]">
+                  <FileText className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                  <span className="font-medium text-[#e7eaee] truncate max-w-[240px]">
                     {selectedFile.name}
                   </span>
                 </div>
                 {!isProcessing && (
                   <button
                     onClick={() => setSelectedFile(null)}
-                    className="text-slate-500 hover:text-red-400 text-[10px] underline cursor-pointer"
+                    className="text-[#656d77] hover:text-red-400 text-[11px] cursor-pointer"
                   >
                     Change
                   </button>
                 )}
               </div>
 
-              {/* Technical Spec Breakdown */}
-              <div className="grid grid-cols-3 gap-2 text-[11px] pt-2 border-t border-slate-800/80">
+              <div className="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-[#272d34]">
                 <div>
-                  <span className="text-slate-500">Size:</span>
-                  <div className="font-bold text-slate-200 mt-0.5">{formatBytes(selectedFile.size)}</div>
+                  <span className="text-[#656d77]">Size:</span>{' '}
+                  <span className="text-[#e7eaee] font-mono">{formatBytes(selectedFile.size)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Piece Count:</span>
-                  <div className="font-bold text-cyan-300 mt-0.5">{pieceCount} pieces</div>
+                  <span className="text-[#656d77]">Piece count:</span>{' '}
+                  <span className="text-[#e7eaee] font-mono">{pieceCount}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Piece Size:</span>
-                  <div className="font-bold text-slate-200 mt-0.5">{formatBytes(DEFAULT_PIECE_SIZE)}</div>
+                  <span className="text-[#656d77]">Piece size:</span>{' '}
+                  <span className="text-[#e7eaee] font-mono">{formatBytes(DEFAULT_PIECE_SIZE)}</span>
+                </div>
+                <div>
+                  <span className="text-[#656d77]">SHA-256:</span>{' '}
+                  <span className="text-emerald-400">Ready</span>
                 </div>
               </div>
 
-              {/* Real-time SHA-256 Progress Bar */}
               {isProcessing && (
-                <div className="pt-2 border-t border-slate-800 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-cyan-300 flex items-center gap-1.5 font-semibold">
-                      <Loader2 className="w-3 h-3 animate-spin text-cyan-400" />
-                      Computing SHA-256 Piece Hashes...
+                <div className="pt-2 border-t border-[#272d34] space-y-1">
+                  <div className="flex justify-between text-[11px] text-[#9299a3]">
+                    <span className="flex items-center gap-1.5">
+                      <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+                      Calculating SHA-256 piece hashes...
                     </span>
-                    <span className="font-bold text-white">{hashingProgress}%</span>
+                    <span className="font-mono text-[#e7eaee]">{hashingProgress}%</span>
                   </div>
-                  <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                  <div className="w-full bg-[#15191e] rounded-xs h-1.5 overflow-hidden border border-[#272d34]">
                     <div
-                      className="h-full bg-cyan-400 transition-all duration-150"
+                      className="h-full bg-blue-500 transition-all duration-150"
                       style={{ width: `${hashingProgress}%` }}
                     />
                   </div>
@@ -189,37 +182,29 @@ export const SeedModal: React.FC<SeedModalProps> = ({ isOpen, onClose, onSeedFil
           )}
 
           {errorMsg && (
-            <div className="p-2.5 rounded bg-red-950/60 border border-red-500/40 text-red-300 text-[11px] flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+            <div className="p-2 bg-red-950/40 border border-red-800/60 rounded text-red-300 text-[11px] flex items-center gap-2">
+              <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/80">
+          {/* Dialog Action Buttons */}
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#272d34]">
             <button
               type="button"
               onClick={onClose}
               disabled={isProcessing}
-              className="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+              className="px-3 py-1 bg-[#191e24] hover:bg-[#20262e] border border-[#272d34] text-[#9299a3] hover:text-[#e7eaee] rounded transition-colors cursor-pointer"
             >
               Cancel
             </button>
-
             <button
               type="button"
               onClick={handleSubmit}
               disabled={!selectedFile || isProcessing}
-              className="px-4 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold tracking-wide flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.3)] transition-all cursor-pointer"
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded font-medium transition-colors cursor-pointer"
             >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>CREATING TORRENT...</span>
-                </>
-              ) : (
-                <span>CREATE TORRENT / START SEEDING</span>
-              )}
+              {isProcessing ? 'Hashing...' : 'Start Seeding'}
             </button>
           </div>
         </div>

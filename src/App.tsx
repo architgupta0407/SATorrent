@@ -1,6 +1,6 @@
 /**
  * SATorrent - Decentralized WebRTC Swarm File Sharing Client
- * Modern Desktop Torrent Client & Networking Dashboard
+ * Professional Desktop Peer-to-Peer File Sharing Client
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -29,23 +29,19 @@ import {
   CollegeDemoState,
 } from './types';
 import { StoredCompletedFile } from './lib/storage';
+import { formatSpeed } from './lib/crypto';
 import {
   AlertCircle,
   CheckCircle2,
   X,
-  Upload,
-  Radio,
-  Share2,
   Copy,
   Check,
   LogOut,
-  Users,
-  ShieldCheck,
-  Activity,
+  Radio,
+  ArrowDown,
+  ArrowUp,
+  Terminal,
   Layers,
-  FileText,
-  PlusCircle,
-  LogIn,
 } from 'lucide-react';
 
 interface Toast {
@@ -86,7 +82,7 @@ export default function App() {
     setToasts((prev) => [...prev, { id, type, message }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    }, 3500);
   };
 
   // Initialize Torrent Engine on mount
@@ -186,8 +182,16 @@ export default function App() {
   const activeTorrentList = Array.from(torrents.values());
   const primaryTorrent = activeTorrentList.length > 0 ? activeTorrentList[0] : undefined;
 
+  // Aggregate Swarm Speeds
+  let totalDlBps = 0;
+  let totalUlBps = 0;
+  for (const [, p] of peers) {
+    totalDlBps += p.downloadSpeedBps;
+    totalUlBps += p.uploadSpeedBps;
+  }
+
   return (
-    <div className="h-screen bg-[#060a12] text-slate-100 flex flex-col font-mono select-none overflow-hidden text-xs">
+    <div className="h-screen bg-[#0d0f12] text-[#e7eaee] flex flex-col font-sans select-none overflow-hidden text-xs">
       {/* 1. Global Desktop Top Bar */}
       <Header
         localPeerId={engine ? engine.getLocalPeerId() : 'SAT-......'}
@@ -216,8 +220,8 @@ export default function App() {
         />
 
         {/* Center Main Scrollable Viewport */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 pb-20 md:pb-6 space-y-4 bg-[#050811] text-xs">
-          {/* Top Statistics Strip (Always visible on Overview, Transfers, and Swarm) */}
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 pb-10 space-y-3 bg-[#0d0f12] text-xs">
+          {/* Top Statistics Strip */}
           {(activeTab === 'overview' || activeTab === 'transfers' || activeTab === 'swarm') && (
             <MetricsCards
               peers={peers}
@@ -230,53 +234,58 @@ export default function App() {
           {/* VIEW: OVERVIEW (The Core Desktop Torrent Centerpiece)     */}
           {/* ======================================================== */}
           {activeTab === 'overview' && (
-            <div className="space-y-4">
-              {/* Room System Panel & Network Health Bar */}
-              <div className="p-3 rounded-xl bg-[#070b14] border border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+            <div className="space-y-3">
+              {/* Room System Panel & Network Health Bar (Clean, Technical) */}
+              <div className="p-2.5 rounded bg-[#15191e] border border-[#272d34] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 {roomState ? (
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500 font-semibold text-[10px]">ROOM:</span>
-                      <span className="font-bold text-cyan-300 text-sm tracking-wider">{roomState.roomCode}</span>
+                  <div className="flex items-center gap-3 flex-wrap text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[#656d77]">Room:</span>
+                      <span className="font-mono font-semibold text-[#e7eaee] tracking-wide">
+                        {roomState.roomCode}
+                      </span>
                       <button
                         onClick={() => copyRoom(roomState.roomCode)}
-                        className="p-1 text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                        className="p-0.5 text-[#9299a3] hover:text-[#e7eaee] transition-colors cursor-pointer"
                         title="Copy Room Code"
                       >
-                        {copiedRoomCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedRoomCode ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
                       </button>
                     </div>
 
-                    <div className="h-3.5 w-px bg-slate-800 hidden sm:block" />
+                    <span className="text-[#272d34] hidden sm:inline">|</span>
 
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <span className="text-slate-500 text-[10px]">PEERS:</span>
-                      <span className="font-bold text-white">{peers.size + 1} / {roomState.maxPeers}</span>
-                    </div>
-
-                    <div className="h-3.5 w-px bg-slate-800 hidden sm:block" />
-
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-slate-500 text-[10px]">STATUS:</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
-                        SWARM ACTIVE
+                    <div className="flex items-center gap-1.5 text-[#9299a3]">
+                      <span>Swarm:</span>
+                      <span className="font-mono font-medium text-[#e7eaee]">
+                        {peers.size + 1} / {roomState.maxPeers} peers
                       </span>
                     </div>
 
-                    <div className="h-3.5 w-px bg-slate-800 hidden sm:block" />
+                    <span className="text-[#272d34] hidden sm:inline">|</span>
 
-                    <div className="flex items-center gap-3 text-[10px] text-slate-400">
-                      <span>SIGNALING: <strong className="text-emerald-400">Connected</strong></span>
-                      <span>WEBRTC: <strong className="text-cyan-300">{peers.size} peers</strong></span>
-                      <span>DATA CHANNEL: <strong className="text-emerald-400">Healthy</strong></span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span className="text-emerald-400 font-medium">Mesh Connected</span>
+                    </div>
+
+                    <span className="text-[#272d34] hidden sm:inline">|</span>
+
+                    <div className="flex items-center gap-3 text-[11px] text-[#9299a3]">
+                      <span>Signaling: <strong className="text-emerald-400 font-normal">Active</strong></span>
+                      <span>DataChannels: <strong className="text-[#e7eaee] font-normal">{peers.size} open</strong></span>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <Radio className="w-4 h-4 text-amber-400 animate-pulse flex-shrink-0" />
+                  <div className="flex items-center gap-2.5 text-[11px]">
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
                     <div>
-                      <span className="font-bold text-slate-200">Not Connected to a Swarm Room</span>
-                      <p className="text-[11px] text-slate-400">Create a new room or enter an existing 6-character code to join peers.</p>
+                      <span className="font-medium text-[#e7eaee]">Not Connected to Swarm Room</span>
+                      <span className="text-[#656d77] ml-2">Create a room or enter a room code to join peers.</span>
                     </div>
                   </div>
                 )}
@@ -286,7 +295,7 @@ export default function App() {
                   {roomState ? (
                     <button
                       onClick={handleLeaveRoom}
-                      className="px-2.5 py-1 bg-slate-800 hover:bg-red-950/80 hover:text-red-300 border border-slate-700 hover:border-red-800/60 text-slate-300 rounded text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-2.5 py-1 bg-[#191e24] hover:bg-red-950/40 hover:text-red-300 border border-[#272d34] hover:border-red-800/60 text-[#9299a3] rounded text-[11px] font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
                       <LogOut className="w-3 h-3" />
                       <span>Leave Room</span>
@@ -295,13 +304,13 @@ export default function App() {
                     <>
                       <button
                         onClick={() => setJoinModalConfig({ isOpen: true, initialMode: 'create' })}
-                        className="px-3 py-1 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded text-[11px] font-bold shadow-sm transition-all cursor-pointer"
+                        className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px] font-medium transition-colors cursor-pointer"
                       >
                         Create Room
                       </button>
                       <button
                         onClick={() => setJoinModalConfig({ isOpen: true, initialMode: 'join' })}
-                        className="px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 rounded text-[11px] font-bold transition-all cursor-pointer"
+                        className="px-2.5 py-1 bg-[#191e24] hover:bg-[#20262e] border border-[#272d34] text-[#e7eaee] rounded text-[11px] font-medium transition-colors cursor-pointer"
                       >
                         Join Room
                       </button>
@@ -310,23 +319,23 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Centerpiece: Active Transfers Table & Piece Map */}
+              {/* Centerpiece: Active Transfers Table & Bottom Tabs */}
               <TransferView
                 torrents={activeTorrentList}
                 peers={peers}
                 onTogglePause={(fileId) => engine?.togglePauseTorrent(fileId)}
+                logs={logs}
+                roomCode={roomState?.roomCode}
+                engine={engine}
               />
 
-              {/* Lower Section: Real-time Activity Feed & Swarm Topology */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Real-time Activity Feed */}
+              {/* Lower Section: Activity Feed & Swarm Visualizer */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <ActivityFeed
                   logs={logs}
                   onClear={() => setLogs([])}
                   maxItems={10}
                 />
-
-                {/* Compact Swarm Visualizer */}
                 <SwarmVisualizer
                   localPeerId={engine?.getLocalPeerId() || ''}
                   peers={peers}
@@ -344,25 +353,25 @@ export default function App() {
           {/* VIEW: TRANSFERS                                          */}
           {/* ======================================================== */}
           {activeTab === 'transfers' && (
-            <div className="space-y-4">
-              {/* Filter Tabs */}
-              <div className="flex items-center gap-1 bg-[#070b14] p-1.5 rounded-xl border border-slate-800/80 text-xs">
+            <div className="space-y-3">
+              {/* Filter Tabs (Clean Segmented Control) */}
+              <div className="flex items-center gap-1 bg-[#15191e] p-1 rounded border border-[#272d34] text-xs">
                 {(
                   [
                     { id: 'all', label: `All (${activeTorrentList.length})` },
-                    { id: 'downloading', label: `Downloading (${activeTorrentList.filter(t => t.status === 'downloading').length})` },
+                    { id: 'downloading', label: `Downloading (${activeTorrentList.filter(t => t.status === 'downloading' && !t.isPaused).length})` },
                     { id: 'seeding', label: `Seeding (${activeTorrentList.filter(t => t.isSeeder || t.status === 'seeding').length})` },
-                    { id: 'completed', label: `Completed (${activeTorrentList.filter(t => t.status === 'completed').length})` },
+                    { id: 'completed', label: `Completed (${activeTorrentList.filter(t => t.status === 'completed' || t.overallSha256Status === 'verified').length})` },
                     { id: 'paused', label: `Paused (${activeTorrentList.filter(t => t.isPaused).length})` },
                   ] as const
                 ).map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setTransferFilter(tab.id)}
-                    className={`px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
                       transferFilter === tab.id
-                        ? 'bg-cyan-950 text-cyan-300 border border-cyan-700/50'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-[#1e2530] text-[#e7eaee]'
+                        : 'text-[#9299a3] hover:text-[#e7eaee]'
                     }`}
                   >
                     {tab.label}
@@ -375,6 +384,9 @@ export default function App() {
                 peers={peers}
                 onTogglePause={(fileId) => engine?.togglePauseTorrent(fileId)}
                 filterMode={transferFilter}
+                logs={logs}
+                roomCode={roomState?.roomCode}
+                engine={engine}
               />
             </div>
           )}
@@ -383,7 +395,7 @@ export default function App() {
           {/* VIEW: SWARM MESH                                         */}
           {/* ======================================================== */}
           {activeTab === 'swarm' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <SwarmVisualizer
                 localPeerId={engine?.getLocalPeerId() || ''}
                 peers={peers}
@@ -398,7 +410,7 @@ export default function App() {
           {/* VIEW: PEERS                                              */}
           {/* ======================================================== */}
           {activeTab === 'peers' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <PeerTable peers={peers} activeTorrent={primaryTorrent} />
             </div>
           )}
@@ -407,7 +419,7 @@ export default function App() {
           {/* VIEW: FILES                                              */}
           {/* ======================================================== */}
           {activeTab === 'files' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <CompletedFilesView
                 files={completedFiles}
                 torrents={activeTorrentList}
@@ -427,7 +439,7 @@ export default function App() {
           {/* VIEW: SETTINGS                                           */}
           {/* ======================================================== */}
           {activeTab === 'settings' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <SettingsView
                 localPeerId={engine?.getLocalPeerId() || ''}
                 onClearAllData={() => {
@@ -441,13 +453,66 @@ export default function App() {
         </main>
       </div>
 
-      {/* 3. Non-Intrusive Floating College Presentation Checklist */}
-      <CollegeDemoBadge
-        roomState={roomState}
-        peersCount={peers.size}
-        primaryTorrent={primaryTorrent}
-        demoState={demoState}
-      />
+      {/* 3. Global Desktop Status Bar (Bottom of Window - qBittorrent/VS Code Style) */}
+      <footer className="h-6 bg-[#111418] border-t border-[#272d34] px-3 flex items-center justify-between text-[11px] text-[#9299a3] select-none z-30">
+        <div className="flex items-center gap-3">
+          {/* Total Download Rate */}
+          <div className="flex items-center gap-1 font-mono text-blue-400">
+            <ArrowDown className="w-3 h-3" />
+            <span>D: {totalDlBps > 0 ? formatSpeed(totalDlBps) : '0.0 B/s'}</span>
+          </div>
+
+          <span className="text-[#272d34]">|</span>
+
+          {/* Total Upload Rate */}
+          <div className="flex items-center gap-1 font-mono text-emerald-400">
+            <ArrowUp className="w-3 h-3" />
+            <span>U: {totalUlBps > 0 ? formatSpeed(totalUlBps) : '0.0 B/s'}</span>
+          </div>
+
+          <span className="text-[#272d34]">|</span>
+
+          {/* Swarm Peers */}
+          <div className="flex items-center gap-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${peers.size > 0 ? 'bg-emerald-400' : 'bg-[#656d77]'}`} />
+            <span>{peers.size} {peers.size === 1 ? 'peer' : 'peers'}</span>
+          </div>
+
+          <span className="text-[#272d34] hidden sm:inline">|</span>
+
+          {/* Signaling Status */}
+          <div className="hidden sm:flex items-center gap-1 text-[#656d77]">
+            <span>DHT/Signaling:</span>
+            <span className="text-emerald-400">Connected</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Room Code */}
+          {roomState ? (
+            <button
+              onClick={() => copyRoom(roomState.roomCode)}
+              className="flex items-center gap-1 font-mono text-[#e7eaee] hover:text-blue-400 transition-colors cursor-pointer"
+              title="Click to copy room code"
+            >
+              <span className="text-[#656d77]">Room:</span>
+              <span>{roomState.roomCode}</span>
+            </button>
+          ) : (
+            <span className="text-[#656d77]">No active room</span>
+          )}
+
+          <span className="text-[#272d34]">|</span>
+
+          {/* College Demo Checklist Status */}
+          <CollegeDemoBadge
+            roomState={roomState}
+            peersCount={peers.size}
+            primaryTorrent={primaryTorrent}
+            demoState={demoState}
+          />
+        </div>
+      </footer>
 
       {/* 4. Collapsible Developer Diagnostics Drawer */}
       <DebugDrawer
@@ -478,27 +543,21 @@ export default function App() {
         onCreateRoom={handleCreateRoom}
       />
 
-      {/* 7. Live Toast Notifications */}
-      <div className="fixed bottom-4 right-4 z-50 space-y-1.5 pointer-events-none font-mono text-xs">
+      {/* 7. Live Toast Notifications (Clean, Restrained) */}
+      <div className="fixed bottom-8 right-4 z-50 space-y-1.5 pointer-events-none text-xs">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-lg border shadow-xl backdrop-blur-md transition-all ${
-              toast.type === 'error'
-                ? 'bg-red-950/90 text-red-200 border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.25)]'
-                : toast.type === 'success'
-                ? 'bg-emerald-950/90 text-emerald-200 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
-                : 'bg-slate-900/90 text-cyan-200 border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-            }`}
+            className="pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded bg-[#161a1f] border border-[#272d34] text-[#e7eaee] shadow-lg transition-all"
           >
             {toast.type === 'error' ? (
               <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
             ) : toast.type === 'success' ? (
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
             ) : (
-              <Radio className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+              <Radio className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
             )}
-            <span className="font-semibold">{toast.message}</span>
+            <span className="font-medium text-[11px]">{toast.message}</span>
           </div>
         ))}
       </div>
