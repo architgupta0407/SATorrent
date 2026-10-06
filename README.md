@@ -1,155 +1,402 @@
-# SATorrent - Decentralized WebRTC Swarm File Sharing Platform
+# SATorrent
 
-SATorrent is a real working peer-to-peer file sharing swarm platform inspired by BitTorrent, built with **React**, **TypeScript**, **Tailwind CSS**, and **native WebRTC DataChannels**.
+### Decentralized Peer-to-Peer Swarm File Sharing Platform
 
-It allows users to connect multiple devices in a room, split files into 64 KB pieces, distribute pieces across peers using a **BitTorrent-style Rarest-First scheduler**, re-seed acquired pieces to other peers, verify piece & full-file integrity with **SHA-256**, and reconstruct complete files locally.
+SATorrent is a BitTorrent-inspired, browser-based peer-to-peer file sharing platform built as a college project.
 
----
+Instead of sending a complete file to a central server, SATorrent splits a file into 64 KB pieces and lets connected peers exchange those pieces directly over WebRTC. Verified pieces can be re-shared by other peers, creating a multi-peer swarm.
 
-## 🏗 Architecture & Geniuine P2P Verification
-
-- **Zero Server File Bytes**: File bytes and piece payloads **never** touch the Node.js signaling server.
-- **Signaling Server (`server.ts`)**: Handles only lightweight JSON messages for room creation, peer discovery, and WebRTC SDP offer/answer/ICE candidate routing over WebSockets (`ws`).
-- **Data Transfer**: 100% direct peer-to-peer over WebRTC `RTCDataChannel` using a self-describing 64-byte binary frame (`SATO` magic bytes, piece index, payload size, file ID, and transfer ID).
-- **Rarest-First Scheduling**: Peers inspect what pieces connected peers own and prioritize requesting pieces that have the fewest copies in the swarm.
-- **Immediate Re-Seeding**: As soon as Peer B receives and verifies piece 1 from Peer A (the seeder), Peer B broadcasts `HAVE` to all peers in the room. Peer C can now download piece 1 directly from Peer B, demonstrating true decentralized multi-peer swarm propagation!
-- **Strict Verification**: Every single 64 KB piece is validated against its expected SHA-256 hash before being marked as owned or stored. The reconstructed complete file is validated against the overall SHA-256 manifest hash before being unlocked for download.
+> The signaling server helps peers discover and connect to each other. The actual file data travels directly between peers.
 
 ---
 
-## 📁 Project Structure
+## ✨ Features
 
-```
-├── server.ts                    # Full-Stack Express & WebSocket Signaling Server
-├── test-swarm.ts                # Automated core test suite (scheduler, hashing, framing)
-├── index.html                   # Application HTML shell
-├── package.json                 # Dependencies and execution scripts
-├── vite.config.ts               # Vite configuration
-├── metadata.json                # Project metadata
-│
-├── src/
-│   ├── main.tsx                 # React entry point
-│   ├── App.tsx                  # Primary SATorrent client dashboard
-│   ├── index.css                # Futuristic dark theme styling & custom scrollbars
-│   │
-│   ├── types/
-│   │   └── index.ts             # Protocol message types, FileManifest, Swarm models
-│   │
-│   ├── lib/
-│   │   ├── crypto.ts            # Web Crypto SHA-256 hashing & ID generators
-│   │   ├── protocol.ts          # 64-byte binary piece framing and unpacker
-│   │   └── storage.ts           # Browser IndexedDB persistence for pieces & files
-│   │
-│   ├── webrtc/
-│   │   └── PeerConnectionManager.ts # Deterministic polite offerer WebRTC manager
-│   │
-│   ├── swarm/
-│   │   ├── PieceScheduler.ts    # Rarest-first scheduler with concurrency limits
-│   │   └── TorrentEngine.ts     # Swarm orchestrator (signaling, seeding, re-seeding)
-│   │
-│   └── components/
-│       ├── Header.tsx           # Brand "SA" emblem, room status, action buttons
-│       ├── Sidebar.tsx          # Client navigation & Dev Console trigger
-│       ├── MetricsCards.tsx     # Real-time speeds, peers online, verified pieces
-│       ├── TransferView.tsx     # Active torrent details & progress bar
-│       ├── PieceBitmap.tsx      # Visual piece matrix [■■■■■■■■□□] with popover
-│       ├── SwarmVisualizer.tsx  # Canvas mesh topology graph with animated pulse dots
-│       ├── PeerTable.tsx        # Live peer stats (DL/UL speed, pieces owned, RTT latency)
-│       ├── CompletedFilesView.tsx # Downloaded & verified files with "Save File" button
-│       ├── SeedModal.tsx        # Drag & drop file seeder with 250MB limit check
-│       ├── JoinRoomModal.tsx    # Room creator & room code joiner
-│       ├── DebugDrawer.tsx      # Collapsible RTC telemetry & live event console
-│       └── SettingsView.tsx     # STUN/TURN configuration & cache manager
-```
+- Multi-peer rooms with support for up to 8 peers in the demo
+- Direct WebRTC peer-to-peer connections
+- 64 KB piece-based file transfers
+- BitTorrent-style rarest-first scheduling
+- Leecher re-seeding and multi-hop piece propagation
+- SHA-256 verification for pieces and complete files
+- IndexedDB browser persistence
+- Peer disconnect recovery and request reassignment
+- Real-time swarm, peer and transfer telemetry
+- Developer diagnostics console
+- Multiple active torrents in the same room
+- No file bytes sent through the signaling server
 
 ---
 
-## 🚀 How to Run the Application
+## 🧠 How SATorrent Works
 
-### 1. Install dependencies
-```bash
-npm install
-```
+SATorrent uses a WebRTC mesh with a lightweight WebSocket signaling server.
 
-### 2. Run the development server
-```bash
-npm run dev
-```
-The server will start on `http://localhost:3000` with WebSocket signaling available at `ws://localhost:3000/ws`.
+~~~text
+                  SATorrent Signaling Server
+                 room + WebRTC signaling only
+                            |
+            +---------------+---------------+
+            |               |               |
+            v               v               v
+         Peer A           Peer B          Peer C
+         Seeder          Leecher         Leecher
+            |               |               |
+            +------- direct WebRTC --------+
+                    piece exchange
+~~~
 
-### 3. Run automated tests
-```bash
-# Core logic unit tests
+### Signaling Server
+
+The Node.js server handles:
+
+- Room creation and joining
+- Peer discovery
+- SDP offer/answer routing
+- ICE candidate routing
+- Peer join and leave notifications
+
+It does not receive or store file bytes.
+
+### WebRTC Mesh
+
+Peers establish direct WebRTC connections with other peers in the room. Actual piece data is transferred through RTCDataChannel.
+
+### Piece Scheduler
+
+Files are divided into 64 KB pieces. The scheduler tracks:
+
+- Missing pieces
+- Pieces owned by every peer
+- In-flight requests
+- Piece rarity
+- Per-peer request limits
+- Request timeouts and retries
+
+Rarer pieces are prioritized so the swarm can distribute data efficiently.
+
+---
+
+## 🔄 Swarm Re-Seeding
+
+A key SATorrent feature is leecher-to-leecher propagation.
+
+~~~text
+Seeder A
+   |
+   +---- Piece 0 ----> Peer B
+   |
+   +---- Piece 1 ----> Peer C
+
+Peer B verifies Piece 0
+   |
+   +--------------------> Peer C
+~~~
+
+Once a peer verifies a piece, it advertises that piece to the swarm and can serve it to other peers.
+
+This allows the system to demonstrate:
+
+~~~text
+Seeder → Peer B
+Seeder → Peer C
+Peer B → Peer C
+Peer C → Peer B
+~~~
+
+based on real piece availability.
+
+---
+
+## 🔐 Integrity Verification
+
+SATorrent uses SHA-256 at two levels.
+
+### Piece verification
+
+Every incoming piece is:
+
+1. Received over WebRTC
+2. Hashed
+3. Compared with its expected piece hash
+4. Marked as owned only after verification
+
+### Complete-file verification
+
+After all pieces are available:
+
+1. Pieces are reconstructed in the correct order
+2. The complete file is hashed
+3. The hash is compared with the manifest hash
+4. Save File is enabled only after successful verification
+
+---
+
+## 📦 Piece Protocol
+
+SATorrent separates control messages from binary file data.
+
+### Control messages
+
+- HELLO
+- FILE_MANIFEST
+- HAVE
+- HAVE_BATCH
+- PIECE_REQUEST
+- PIECE_META
+- PIECE_REJECT
+- PING
+- PONG
+
+### Binary data
+
+Actual file pieces are transferred as binary frames containing the metadata required to identify the file, transfer and piece.
+
+Default piece payload size: 64 KB.
+
+---
+
+## 🖥️ Client Interface
+
+SATorrent is designed as a desktop-style torrent client.
+
+### Main views
+
+- Overview
+- Transfers
+- Swarm Mesh
+- Peers
+- Files
+- Settings
+- Developer Console
+
+### Piece map
+
+The piece map represents real runtime state:
+
+| State | Meaning |
+|---|---|
+| Green | Verified locally |
+| Blue / Cyan | Available on the swarm |
+| Purple | Request in flight |
+| Gray | Missing |
+
+The peer table shows peer ID, role, connection state, pieces owned, completion, download speed, upload speed and latency where available.
+
+The swarm mesh visualizer is generated from real WebRTC peer connections.
+
+---
+
+## 🧪 Testing
+
+The repository contains automated tests for the core swarm engine.
+
+Run:
+
+~~~bash
 npx tsx test-swarm.ts
-
-# 3-Device end-to-end acceptance scenario
 npx tsx test-acceptance-scenario.ts
-
-# 5-Device full decentralized swarm test
 npx tsx test-5peer-swarm.ts
-```
-Tests will execute and verify:
-1. Web Crypto SHA-256 computation & piece validation
-2. 64-byte binary framing and zero-copy unpacking
-3. Rarest-first piece scheduling & load balancing
-4. Duplicate request prevention & concurrency limits (max 3/peer)
-5. Peer disconnect recovery & pending piece reassignment
-6. True 5-peer decentralized mesh with multi-generational leecher propagation (Device 1 ➔ Device 2, Device 1 ➔ Device 3, Device 2 ➔ Device 3, Device 2 ➔ Device 4, Device 3 ➔ Device 5)
-7. Multiple active torrents seeded and downloaded simultaneously in the same room
-8. Strict signaling server byte audit: 0 file bytes through the signaling server
-9. End-to-end file splitting, verification, and full reconstruction with SHA-256 match
+~~~
+
+The test coverage includes:
+
+- SHA-256 computation
+- Piece hashing and validation
+- Binary frame encoding and decoding
+- Rarest-first scheduling
+- Duplicate request prevention
+- Per-peer concurrency limits
+- Peer disconnect recovery
+- Request reassignment
+- End-to-end file reconstruction
+- 5-peer swarm behavior
+- Leecher-to-leecher piece propagation
+- Multiple active torrents
+- Signaling-server file-byte audit
 
 ---
 
-## 👥 How to Test with 3–5 Devices (College Demo Scenario)
+## 🌐 Multi-Device Demo
 
-### Step 1: Device 1 (The Seeder)
-1. Open SATorrent in your browser (or laptop 1).
-2. Click **Create Room** (or use the auto-generated 6-character room code, e.g. `ABC123`).
-3. Click **Seed File** and choose a sample file (e.g., an image, PDF, or video up to 250 MB).
-4. Watch the progress bar as SATorrent calculates the SHA-256 hash for every 64 KB piece and the overall file hash.
-5. Device 1 will now display all pieces as **green (Verified / Seeded)**.
+For the college demonstration, use 3–5 physical devices on the same Wi-Fi network.
 
-### Step 2: Device 2 (Leecher / Re-Seeder)
-1. Open SATorrent on Device 2 (or a separate browser window / incognito tab).
-2. Click **Join Room** and enter the room code `ABC123`.
-3. Device 2 instantly discovers the file manifest from Device 1 via WebRTC DataChannel.
-4. Device 2 begins requesting pieces from Device 1 according to the rarest-first algorithm.
-5. Watch the Piece Bitmap on Device 2:
-   - **Purple blocks**: in-flight downloading pieces
-   - **Green blocks**: verified pieces received and validated with SHA-256
-   - **Cyan blocks**: pieces available in the swarm
+### Device 1 — Seeder
 
-### Step 3: Device 3 (Leecher)
-1. Open SATorrent on Device 3 and join the same room `ABC123`.
-2. Notice how Device 3 establishes WebRTC mesh connections with **both** Device 1 AND Device 2!
-3. The Swarm Mesh Visualizer will show connections between all peers:
-   - Device 1 (Seeder)
-   - Device 2 (Leecher / Re-Seeder)
-   - Device 3 (Leecher)
-4. Device 3 requests pieces from **Device 1 AND Device 2 simultaneously**!
-   - As Device 2 receives pieces, it advertises `HAVE` to Device 3.
-   - Device 3 will download some pieces directly from Device 2 rather than Device 1!
-   - Animated glowing particles on the **Swarm Mesh Visualizer** show the active data flow between Device 1 ➔ Device 2, Device 1 ➔ Device 3, and Device 2 ➔ Device 3!
+1. Open SATorrent.
+2. Create a room.
+3. Share the room code.
+4. Seed a 5–20 MB file.
 
-### Step 4: Reconstruction & Integrity Verification
-1. Once Device 2 or Device 3 collects all pieces, SATorrent automatically reconstructs the full file in piece order.
-2. The engine computes the final SHA-256 hash of the reconstructed file and compares it with the manifest.
-3. The badge turns green: **"SHA-256 VERIFIED"**.
-4. Click **Save File** to download the completed authentic file directly to your disk!
+### Device 2 — Leecher / Re-Seeder
 
----
+1. Join the same room.
+2. Discover the file manifest.
+3. Start downloading.
+4. Watch verified pieces appear.
+5. Those pieces become available for re-seeding.
 
-## 🛠 Developer Diagnostics Drawer
-Click the **Dev Console** button in the bottom left to open the diagnostic drawer. It displays:
-- Real-time RTCPeerConnection states (connected, checking, closed)
-- RTCDataChannel states (`open`)
-- In-flight request queues with active peer assignments
-- RTT ping latency (ms) per peer
-- Live auto-scrolling log of WebRTC and signaling events
+### Device 3 — Swarm Peer
+
+1. Join the same room while Device 2 is still downloading.
+2. Connect to the existing swarm.
+3. Request pieces from multiple peers.
+4. Observe pieces being sourced from Device 1 and Device 2.
+
+The key demonstration is:
+
+~~~text
+Device 1 → Device 2
+Device 1 → Device 3
+Device 2 → Device 3
+~~~
+
+where Device 3 receives at least some pieces from Device 2.
 
 ---
 
-## ⚠️ Notes & Limitations
-- **NAT / Firewalls**: When testing between devices on completely separate networks, STUN servers (`stun.l.google.com`) are used for NAT traversal. If a symmetric NAT or strict university firewall blocks direct UDP, configure TURN credentials in the **Settings** view.
-- **File Size Limit**: Configured to 250 MB for the browser demo to avoid excessive RAM usage in mobile browser tabs.
+## 🧱 Project Structure
+
+~~~text
+SATorrent/
+├── server.ts
+├── package.json
+├── vite.config.ts
+├── index.html
+├── metadata.json
+├── test-swarm.ts
+├── test-acceptance-scenario.ts
+├── test-5peer-swarm.ts
+│
+└── src/
+    ├── main.tsx
+    ├── App.tsx
+    │
+    ├── types/
+    │   └── index.ts
+    │
+    ├── lib/
+    │   ├── crypto.ts
+    │   ├── protocol.ts
+    │   └── storage.ts
+    │
+    ├── webrtc/
+    │   └── PeerConnectionManager.ts
+    │
+    ├── swarm/
+    │   ├── PieceScheduler.ts
+    │   └── TorrentEngine.ts
+    │
+    └── components/
+        ├── Header.tsx
+        ├── Sidebar.tsx
+        ├── MetricsCards.tsx
+        ├── TransferView.tsx
+        ├── PieceBitmap.tsx
+        ├── SwarmVisualizer.tsx
+        ├── PeerTable.tsx
+        ├── CompletedFilesView.tsx
+        ├── SeedModal.tsx
+        ├── JoinRoomModal.tsx
+        ├── DebugDrawer.tsx
+        ├── ActivityFeed.tsx
+        └── SettingsView.tsx
+~~~
+
+---
+
+## 🛠 Tech Stack
+
+**Frontend**
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+
+**Backend**
+- Node.js
+- WebSocket using ws
+
+**P2P Networking**
+- WebRTC
+- RTCDataChannel
+- STUN / configurable TURN
+
+**Browser APIs**
+- Web Crypto API
+- IndexedDB
+
+---
+
+## 🚀 Run Locally
+
+### Prerequisites
+
+- Node.js 18+
+- Modern browser with WebRTC support
+
+### Install
+
+~~~bash
+npm install
+~~~
+
+### Start development server
+
+~~~bash
+npm run dev
+~~~
+
+### Run tests
+
+~~~bash
+npx tsx test-swarm.ts
+npx tsx test-acceptance-scenario.ts
+npx tsx test-5peer-swarm.ts
+~~~
+
+For multi-device testing, open the host machine's LAN address from the other devices rather than using localhost.
+
+---
+
+## ⚠️ Current Limitations
+
+SATorrent is a college-project MVP, not a production BitTorrent client.
+
+Current limitations include:
+
+- Small demo room size
+- Full-mesh networking becomes less efficient as peer count grows
+- No DHT
+- No standard public BitTorrent tracker ecosystem
+- No standard .torrent / magnet-link ecosystem yet
+- NAT traversal depends on STUN / TURN availability
+- Browser storage and memory limits apply
+- Authentication and access control are intentionally lightweight
+
+---
+
+## 🔮 Future Improvements
+
+- DHT-based peer discovery
+- Standard .torrent and magnet-link support
+- Public tracker support
+- Better TURN integration
+- Persistent resume and recheck
+- Selective file download
+- More advanced choking and peer selection
+- Desktop packaging
+- Larger-scale swarm topology
+
+---
+
+## 🎓 College Project
+
+**SATorrent — Smart Torrent File Sharing System**
+
+The project demonstrates how modern browser technologies can be combined to build a decentralized file-sharing system in which peers discover one another, exchange file pieces directly, verify data cryptographically, and contribute downloaded pieces back to the swarm.
+
+---
+
+## 📜 License
+
+This project is intended for educational and demonstration purposes.
