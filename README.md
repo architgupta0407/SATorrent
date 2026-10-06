@@ -10,6 +10,20 @@ Instead of sending a complete file to a central server, SATorrent splits a file 
 
 ---
 
+## 🌐 Live Demo
+
+### Open SATorrent directly in your browser
+
+**https://satorrent.ai.studio/**
+
+No installation is required for the live demo.
+
+Open the same link on multiple devices, create or join the same room, and test the swarm.
+
+> **Note:** Google AI Studio custom URLs use the \`*.ai.studio\` format. So the correct URL is \`satorrent.ai.studio\`, not \`satorrent.studio.ai\`.
+
+---
+
 ## ✨ Features
 
 - Multi-peer rooms with support for up to 8 peers in the demo
@@ -218,7 +232,11 @@ The test coverage includes:
 
 ## 🌐 Multi-Device Demo
 
-For the college demonstration, use 3–5 physical devices on the same Wi-Fi network.
+Use the published SATorrent URL on 3–5 physical devices:
+
+**https://satorrent.ai.studio/**
+
+All devices can open the same URL.
 
 ### Device 1 — Seeder
 
@@ -229,18 +247,20 @@ For the college demonstration, use 3–5 physical devices on the same Wi-Fi netw
 
 ### Device 2 — Leecher / Re-Seeder
 
-1. Join the same room.
-2. Discover the file manifest.
-3. Start downloading.
-4. Watch verified pieces appear.
-5. Those pieces become available for re-seeding.
+1. Open the same SATorrent URL.
+2. Join the room.
+3. Discover the file manifest.
+4. Start downloading.
+5. Watch verified pieces appear.
+6. Those pieces become available for re-seeding.
 
 ### Device 3 — Swarm Peer
 
-1. Join the same room while Device 2 is still downloading.
-2. Connect to the existing swarm.
-3. Request pieces from multiple peers.
-4. Observe pieces being sourced from Device 1 and Device 2.
+1. Open the same SATorrent URL.
+2. Join the same room while Device 2 is still downloading.
+3. Connect to the existing swarm.
+4. Request pieces from multiple peers.
+5. Observe pieces being sourced from Device 1 and Device 2.
 
 The key demonstration is:
 
@@ -251,6 +271,10 @@ Device 2 → Device 3
 ~~~
 
 where Device 3 receives at least some pieces from Device 2.
+
+### Recommended demo file
+
+Use a file around **5–20 MB** rather than a tiny file so the piece-level swarm behavior is easy to observe.
 
 ---
 
@@ -329,6 +353,10 @@ SATorrent/
 
 ## 🚀 Run Locally
 
+The live demo is the recommended way to test SATorrent.
+
+For development, cloning the repository is optional.
+
 ### Prerequisites
 
 - Node.js 18+
@@ -346,15 +374,7 @@ npm install
 npm run dev
 ~~~
 
-### Run tests
-
-~~~bash
-npx tsx test-swarm.ts
-npx tsx test-acceptance-scenario.ts
-npx tsx test-5peer-swarm.ts
-~~~
-
-For multi-device testing, open the host machine's LAN address from the other devices rather than using localhost.
+For multi-device local testing, open the host machine's LAN address from the other devices rather than using \`localhost\`.
 
 ---
 
